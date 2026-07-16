@@ -1,6 +1,4 @@
-# render.yaml — at repo root
 services:
-  #  Django Web Service
   - type: web
     name: dojo-todo-backend
     env: python
@@ -11,12 +9,12 @@ services:
       pip install -r requirements.txt &&
       python manage.py collectstatic --noinput &&
       python manage.py migrate
-    startCommand: gunicorn todoproject.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: bash start.sh
     envVars:
       - key: DEBUG
         value: "False"
       - key: SECRET_KEY
-        generateValue: true
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
@@ -25,57 +23,11 @@ services:
         sync: false
       - key: CORS_ALLOWED_ORIGINS
         sync: false
-      - key: BREVO_SMTP_LOGIN
-        sync: false
-      - key: BREVO_SMTP_KEY
-        sync: false
-      - key: DEFAULT_FROM_EMAIL
-        sync: false
       - key: FRONTEND_URL
         sync: false
-
-  #  Celery Worker
-  - type: worker
-    name: dojo-todo-celery-worker
-    env: python
-    region: oregon
-    plan: free
-    rootDir: backend/todoproject
-    buildCommand: pip install -r requirements.txt
-    startCommand: celery -A todoproject worker -l info
-    envVars:
-      - key: SECRET_KEY
-        fromService:
-          name: dojo-todo-backend
-          type: web
-          envVarKey: SECRET_KEY
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        sync: false
       - key: BREVO_SMTP_LOGIN
         sync: false
       - key: BREVO_SMTP_KEY
         sync: false
       - key: DEFAULT_FROM_EMAIL
-        sync: false
-
-  #  Celery Beat
-  - type: worker
-    name: dojo-todo-celery-beat
-    env: python
-    region: oregon
-    plan: free
-    rootDir: backend/todoproject
-    buildCommand: pip install -r requirements.txt
-    startCommand: celery -A todoproject beat -l info
-    envVars:
-      - key: SECRET_KEY
-        fromService:
-          name: dojo-todo-backend
-          type: web
-          envVarKey: SECRET_KEY
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
         sync: false

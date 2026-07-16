@@ -74,10 +74,12 @@ FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
 
 #  Celery 
 CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = "django-db"
+CELERY_RESULT_BACKEND = config("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Celery Beat Schedule - Configure periodic tasks
+CELERY_BROKER_USE_SSL  = {"ssl_cert_reqs": None}
+CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": None}
 
 
 CELERY_BEAT_SCHEDULE = {
@@ -97,6 +99,7 @@ CELERY_BEAT_SCHEDULE = {
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware", 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -134,16 +137,42 @@ WSGI_APPLICATION = 'todoproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "tododojo",
-        "USER": "postgres",
-        "PASSWORD": "ma.ya2004.J",
-        "HOST": "localhost",
-        "PORT": "5432",
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "tododojo",
+#         "USER": "postgres",
+#         "PASSWORD": "ma.ya2004.J",
+#         "HOST": "localhost",
+#         "PORT": "5432",
+#     }
+# }
+
+#DATABASE CONFIGURATION FOR PRODUCTION
+DATABASE_URL = config("DATABASE_URL", default=None)
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME":     config("DB_NAME",     default="tododojo"),
+            "USER":     config("DB_USER",     default="postgres"),
+            "PASSWORD": config("DB_PASSWORD", default=""),
+            "HOST":     config("DB_HOST",     default="localhost"),
+            "PORT":     config("DB_PORT",     default="5432"),
+        }
+    }
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
