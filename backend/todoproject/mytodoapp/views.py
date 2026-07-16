@@ -34,7 +34,7 @@ class RegisterView(generics.CreateAPIView):
         # Build a secure one-time verification link
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = email_verification_token.make_token(user)
-        link = f"http://127.0.0.1:8000/todos/verify-email/{uid}/{token}/"
+        link = f"https://dojo-todo-backend.onrender.com/todos/verify-email/{uid}/{token}/"
 
         send_email(
             to_email=user.email,
@@ -79,7 +79,7 @@ class VerifyEmailView(generics.GenericAPIView):
     def get(self, request, uidb64, token):
         user = self._verify_user(uidb64, token)
         if user:
-            return redirect("http://localhost:5173/login")
+            return redirect("https://todoappwe.netlify.app/login")
 
         return Response(
             {"error": "Invalid or expired verification link."},
