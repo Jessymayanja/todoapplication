@@ -1,32 +1,27 @@
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.defaultfilters import striptags
 import logging
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+configuration = sib_api_v3_sdk.Configuration()
+configuration.api_key['api-key'] = settings.BREVO_API_KEY
 
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
-    """
-    Shared email utility used by both verification emails and
-    deadline reminders. Uses Django's built-in send_mail which
-    reads SMTP settings from settings.py automatically.
-
-    Returns True if the email was accepted, False on any failure,
-    so calling code can decide whether to retry rather than crashing.
-    """
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+        sib_api_v3_sdk.ApiClient(configuration)
+    )
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{"email": to_email}],
+        sender={"email": settings.DEFAULT_FROM_EMAIL},
+        subject=subject,
+        html_content=html_content,
+    )
     try:
-        text_content = striptags(html_content)
-        message = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[to_email],
-        )
-        message.attach_alternative(html_content, "text/html")
-        message.send(fail_silently=False)
+        api_instance.send_transac_email(send_smtp_email)
         logger.info("Email sent to %s subject=%r", to_email, subject)
         return True
-    except Exception as exc:
+    except ApiException as exc:
         logger.exception("Email failed to %s subject=%r", to_email, subject)
         return False
