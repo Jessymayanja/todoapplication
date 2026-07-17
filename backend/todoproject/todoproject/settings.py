@@ -90,7 +90,7 @@ CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": None}
 CELERY_BEAT_SCHEDULE = {
     '24-hour-deadline-reminders': {
         'task': 'mytodoapp.tasks.check_24h_reminders',
-        'schedule': crontab(minute='*/30'),   # every 30 minutes
+        'schedule': crontab(minute='*'),   # every  minute
     },
 
     '5-minute-deadline-reminders': {
