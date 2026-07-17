@@ -79,17 +79,19 @@ FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
 
 #  Celery 
 # Celery Beat Schedule - Configure periodic tasks
+import ssl
+
 REDIS_URL = config("REDIS_URL", default="")
 
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 
 if REDIS_URL.startswith("rediss://"):
-    CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": None}
-    CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": None}
+    CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": ssl.CERT_NONE}
+    CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": ssl.CERT_NONE}
+
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-
 CELERY_BEAT_SCHEDULE = {
     '24-hour-deadline-reminders': {
         'task': 'mytodoapp.tasks.check_24h_reminders',
