@@ -78,14 +78,17 @@ DEFAULT_FROM_EMAIL  = config("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
 
 #  Celery 
-CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = config("REDIS_URL", default="redis://localhost:6379/0")
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-
 # Celery Beat Schedule - Configure periodic tasks
-CELERY_BROKER_USE_SSL  = {"ssl_cert_reqs": None}
-CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": None}
+REDIS_URL = config("REDIS_URL", default="")
 
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+
+if REDIS_URL.startswith("rediss://"):
+    CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": None}
+    CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": None}
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_BEAT_SCHEDULE = {
     '24-hour-deadline-reminders': {
