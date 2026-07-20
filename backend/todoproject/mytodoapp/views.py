@@ -34,7 +34,7 @@ class RegisterView(generics.CreateAPIView):
         # Build a secure one-time verification link
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = email_verification_token.make_token(user)
-        link = f"https://dojo-todo-backend.onrender.com/todos/verify-email/{uid}/{token}/"
+        link = f"https://tododojo.duckdns.org/todos/verify-email/{uid}/{token}/"
 
         send_email(
             to_email=user.email,
