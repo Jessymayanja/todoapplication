@@ -33,7 +33,7 @@ ALLOWED_HOSTS = config(
     default="localhost,127.0.0.1"
 ).split(",")
 
-
+BACKEND_URL = config("BACKEND_URL")
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', '').split(',')
 CSRF_TRUSTED_ORIGINS = config('CORS_ALLOWED_ORIGINS', '').split(',')
 

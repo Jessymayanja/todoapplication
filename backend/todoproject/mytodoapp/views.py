@@ -1,3 +1,5 @@
+from decouple import config
+
 from rest_framework import generics, status
 from rest_framework.response import Response 
 from .models import Todo, CustomUser
@@ -17,6 +19,8 @@ from django.utils import timezone
 from .email_utils import send_email
 from .tokens import email_verification_token
 from django.shortcuts import redirect
+from django.conf import settings
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -34,7 +38,7 @@ class RegisterView(generics.CreateAPIView):
         # Build a secure one-time verification link
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = email_verification_token.make_token(user)
-        link = f"https://tododojo.duckdns.org/todos/verify-email/{uid}/{token}/"
+        link = f"{config('BACKEND_URL')}/todos/verify-email/{uid}/{token}/"
 
         send_email(
             to_email=user.email,
@@ -79,7 +83,7 @@ class VerifyEmailView(generics.GenericAPIView):
     def get(self, request, uidb64, token):
         user = self._verify_user(uidb64, token)
         if user:
-            return redirect("https://todoappwe.netlify.app/login")
+            return redirect(f"{config('FRONTEND_URL')}/login")
 
         return Response(
             {"error": "Invalid or expired verification link."},
